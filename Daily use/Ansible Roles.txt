@@ -1,0 +1,34 @@
+Create an Ansible role called package under /home/bob/playbooks/roles directory on student-node. It should install a package called nginx and should start its service as well.
+
+
+
+Further consume this role in /home/bob/playbooks/role.yml playbook so that this role can be applied on node01
+
+
+---------------------------------
+cd /home/bob/playbooks/roles/
+ansible-galaxy init package
+
+
+---------------------------------
+vi /home/bob/playbooks/roles/package/tasks/main.yml
+
+---
+# tasks file for nginx
+- name: Install Nginx
+  ansible.builtin.package:
+    name: nginx 
+    state: latest
+- name: Start Nginx Service
+  ansible.builtin.service:
+    name: nginx 
+    state: started
+
+
+vi role.yml
+---
+- hosts: node01
+  become: true
+  roles:
+    - roles/package
+---------------------------------
