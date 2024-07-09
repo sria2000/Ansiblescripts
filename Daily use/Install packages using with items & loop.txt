@@ -1,0 +1,35 @@
+### Install packages using with items & loop
+---
+- name: 'Install required packages'
+  hosts: localhost
+  become: yes
+  vars:
+    packages:
+      - httpd
+      - make
+      - vim
+  tasks:
+    - yum:
+        name: '{{ item }}'
+        state: present
+      with_items: '{{ packages }}'
+
+###OUTPUT
+
+
+[vagrant@student-node playbooks]$ vi packages.yml 
+[vagrant@student-node playbooks]$ ansible-playbook -i inventory packages.yml 
+
+PLAY [Install required packages] ***************************************************************************************************
+
+TASK [Gathering Facts] *************************************************************************************************************
+ok: [localhost]
+
+TASK [yum] *************************************************************************************************************************
+
+ok: [localhost] => (item=httpd)
+ok: [localhost] => (item=make)
+ok: [localhost] => (item=vim)
+
+PLAY RECAP *************************************************************************************************************************
+localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   

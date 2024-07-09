@@ -1,0 +1,47 @@
+# Ansible script to cat /etc/hosts on all hosts
+
+vagrant@ubuntu-xenial:~$ cat host.yml
+---
+- name: Cat hosts file
+  hosts: all
+  tasks:
+  - shell: cat /etc/hosts
+    register: result
+
+  - name: Print host
+    debug:
+      var: result.stdout
+
+  - name: Play2
+    debug:
+      var: result.rc
+vagrant@ubuntu-xenial:~
+
+
+
+###OUTPUT
+
+vagrant@ubuntu-xenial:~$ ansible-playbook -i inventory host.yml
+
+PLAY [Cat hosts file] *************************************************************************************************************************************
+
+TASK [Gathering Facts] ************************************************************************************************************************************
+ok: [192.168.61.11]
+
+TASK [shell] **********************************************************************************************************************************************
+changed: [192.168.61.11]
+
+TASK [Print host] *****************************************************************************************************************************************
+ok: [192.168.61.11] => {
+    "result.stdout": "127.0.0.1\tlocalhost\n\n# The following lines are desirable for IPv6 capable hosts\n::1\tip6-localhost\tip6-loopback\nfe00::0\tip6-localnet\nff00::0\tip6-mcastprefix\nff02::1\tip6-allnodes\nff02::2\tip6-allrouters\nff02::3\tip6-allhosts\n127.0.1.1\tubuntu-xenial\tubuntu-xenial"
+}
+
+TASK [Play2] **********************************************************************************************************************************************
+ok: [192.168.61.11] => {
+    "result.rc": "0"
+}
+
+PLAY RECAP ************************************************************************************************************************************************
+192.168.61.11              : ok=4    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+vagrant@ubuntu-xenial:~$ 

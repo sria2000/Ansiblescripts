@@ -1,0 +1,19 @@
+#On node01, a file called /var/www/html/index.html is available. It already has some content. Using Ansible lineinfile module add the below given content in it:
+#Welcome to UK Lab World!
+#Also make sure to preserve the existing content and this new line must be added at the top of the file.
+
+
+---
+- hosts: node01
+  become: true
+  tasks:
+  - lineinfile:
+      path: /var/www/html/index.html
+      line: 'Welcome to UK Lab World!'
+      state: present
+      insertbefore: BOF
+
+ssh node01
+cat /var/www/html/index.html 
+Welcome to UK Lab World!
+This is Ansible Lab!

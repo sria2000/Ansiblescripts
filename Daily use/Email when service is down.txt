@@ -1,0 +1,24 @@
+### Email when a service is down
+
+---
+- name: Check status of the service and report when down
+  hosts: localhost
+  tasks:
+    - name: Check status of the httpd service
+      service:
+        name: httpd
+        state: started
+      register: result
+      ignore_errors: yes
+
+    - name: Check if httpd service is present
+      fail:
+        msg: "The httpd service is not installed on this system."
+      when: result.failed
+
+    - name: Send alert email if httpd service is down
+      mail:
+        to: test@test.com
+        subject: Service Alert
+        body: "Http service is down"
+      when: result.state != "started"

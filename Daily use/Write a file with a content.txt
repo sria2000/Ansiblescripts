@@ -1,0 +1,26 @@
+## Write a file with a content
+---
+- hosts: node01
+  become: true
+  tasks:
+    - name: create a file
+      copy:
+        dest: /opt/file.txt
+        content: "This file is created by Ansible!"
+
+ ansible-playbook  -i inventory file.yml 
+
+PLAY [Create a file] ***************************************************************************************************************
+
+TASK [Gathering Facts] *************************************************************************************************************
+ok: [node01]
+
+TASK [Touch file] ******************************************************************************************************************
+changed: [node01]
+
+PLAY RECAP *************************************************************************************************************************
+node01                     : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+[bob@node01 ~]$ cat /opt/file.txt 
+This file is created by Ansible![bob@node01 ~]$ 

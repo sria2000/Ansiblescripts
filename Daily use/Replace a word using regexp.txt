@@ -1,0 +1,18 @@
+##Replace a word using regexp
+
+---
+- hosts: node01
+  become: true
+  tasks:
+    - replace:
+        path: /opt/music/blog.txt
+        regexp: 'Abba'
+        replace: 'Carpenter'
+
+- hosts: node02
+  become: true
+  tasks:
+    - replace:
+        path: /opt/music/story.txt
+        regexp: 'Eagle'
+        replace: 'Eminem'

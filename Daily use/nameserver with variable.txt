@@ -1,0 +1,34 @@
+#### Create resolv.conf with nameserver_ip VARIABLE and run via command
+vagrant@ubuntu-xenial:~$ more rs.yaml
+---
+- name: 'Add nameserver in resolv.conf file on localhost'
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: 'Add nameserver in resolv.conf file'
+      lineinfile:
+        path: /tmp/resolv.conf
+        line: 'nameserver {{ nameserver_ip }}'
+vagrant@ubuntu-xenial:~$
+
+
+
+vagrant@ubuntu-xenial:~$ ansible-playbook -i inventory rs.yaml --extra-vars "nameserver_ip=8.8.8.9"
+
+PLAY [Add nameserver in resolv.conf file on localhost] ****************************************************************************************************
+
+TASK [Gathering Facts] ************************************************************************************************************************************
+ok: [localhost]
+
+TASK [Add nameserver in resolv.conf file] *****************************************************************************************************************
+changed: [localhost]
+
+PLAY RECAP ************************************************************************************************************************************************
+localhost                  : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+vagrant@ubuntu-xenial:~$ cat /tmp/resolv.conf
+nameserver 8.8.8.8
+nameserver 8.8.8.9
+vagrant@ubuntu-xenial:~$
+
+

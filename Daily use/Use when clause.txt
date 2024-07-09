@@ -1,0 +1,50 @@
+### Use when clause
+
+---
+- name: 'Am I a Banana or not?'
+  hosts: localhost
+  connection: local
+  vars:
+    fruit: banana
+  tasks:
+    - command: 'echo "I am a Banana"'
+      when: fruit == "banana"
+
+    - command: 'echo "I am not a Banana"'
+      when: fruit != "banana"
+
+##output
+ansible-playbook -i localhost, banana.yml -vv
+ansible-playbook [core 2.14.17]
+  config file = /home/bob/playbooks/ansible.cfg
+  configured module search path = ['/home/bob/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+  ansible python module location = /usr/lib/python3.9/site-packages/ansible
+  ansible collection location = /home/bob/.ansible/collections:/usr/share/ansible/collections
+  executable location = /usr/bin/ansible-playbook
+  python version = 3.9.18 (main, Jan 24 2024, 00:00:00) [GCC 11.4.1 20231218 (Red Hat 11.4.1-3)] (/usr/bin/python3)
+  jinja version = 3.1.2
+  libyaml = True
+Using /home/bob/playbooks/ansible.cfg as config file
+Skipping callback 'default', as we already have a stdout callback.
+Skipping callback 'minimal', as we already have a stdout callback.
+Skipping callback 'oneline', as we already have a stdout callback.
+
+PLAYBOOK: banana.yml ***************************************************************************************************************
+1 plays in banana.yml
+
+PLAY [Am I a Banana or not?] *******************************************************************************************************
+
+TASK [Gathering Facts] *************************************************************************************************************
+task path: /home/bob/playbooks/banana.yml:2
+ok: [localhost]
+
+TASK [command] *********************************************************************************************************************
+task path: /home/bob/playbooks/banana.yml:8
+changed: [localhost] => {"changed": true, "cmd": ["echo", "I am a Banana"], "delta": "0:00:00.003615", "end": "2024-07-08 17:57:26.415455", "msg": "", "rc": 0, "start": "2024-07-08 17:57:26.411840", "stderr": "", "stderr_lines": [], "stdout": "I am a Banana", "stdout_lines": ["I am a Banana"]}
+
+TASK [command] *********************************************************************************************************************
+task path: /home/bob/playbooks/banana.yml:11
+skipping: [localhost] => {"changed": false, "skip_reason": "Conditional result was False"}
+
+PLAY RECAP *************************************************************************************************************************
+localhost                  : ok=2    changed=1    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0  

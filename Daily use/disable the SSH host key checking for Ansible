@@ -1,0 +1,4 @@
+##Create an Ansible configuration file under /home/vagrant/playbooks directory and disable the SSH host key checking for Ansible.
+# vi ansible.cfg
+[defaults]
+host_key_checking = False

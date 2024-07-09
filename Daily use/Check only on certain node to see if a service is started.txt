@@ -1,0 +1,9 @@
+## Check only on certain node to see if a service is started
+
+---
+-  name: 'Execute a script on all web server nodes'
+   hosts: all
+   become: yes
+   tasks:
+     -  service: 'name=ssh state=started'
+        when: 'ansible_host=="web01"'

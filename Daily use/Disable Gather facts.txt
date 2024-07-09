@@ -1,0 +1,30 @@
+### Disable gather facts
+vagrant@ubuntu-xenial:~$ cat facts.yaml
+---
+- name: Gather facts from servers
+  hosts: all
+### Disable Gather facts
+  gather_facts: no
+  tasks:
+  - debug:
+      var: ansible_facts
+vagrant@ubuntu-xenial:~$
+
+####OUTPUT
+vagrant@ubuntu-xenial:~$ ansible-playbook -i inventory facts.yaml
+
+PLAY [Gather facts from servers] **************************************************************************************************************************
+
+TASK [debug] **********************************************************************************************************************************************
+ok: [192.168.61.12] => {
+    "ansible_facts": {}
+}
+ok: [192.168.61.11] => {
+    "ansible_facts": {}
+}
+
+PLAY RECAP ************************************************************************************************************************************************
+192.168.61.11              : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+192.168.61.12              : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+

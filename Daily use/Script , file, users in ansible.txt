@@ -1,0 +1,22 @@
+### Script , file, users in ansible
+---
+- name: 'hosts'
+  hosts: all
+  become: yes
+  tasks:
+    - name: 'Execute a script'
+      script: '/tmp/install_script.sh'
+    - name: 'Start httpd service'
+      service:
+        name: 'httpd'
+        state: 'started'
+    - name: "Update /var/www/html/index.html"
+      lineinfile:
+        path: /var/www/html/index.html
+        line: "Welcome to ansible-beginning course"
+        create: true
+    - name: 'Create a new user'
+      user:
+        name: 'web_user'
+        uid: 1040
+        group: 'developers'

@@ -1,0 +1,19 @@
+##Create a file as a user in two nodes
+---
+- hosts: node01
+  become: true
+  tasks:
+    - name: Creating blog.txt file
+      file:
+        path: /opt/news/blog.txt
+        state: touch
+        group: sam
+
+- hosts: node02
+  become: true
+  tasks:
+    - name: Creating story.txt file
+      file:
+        path: /opt/news/story.txt
+        state: touch
+        owner: sam

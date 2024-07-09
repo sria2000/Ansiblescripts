@@ -1,0 +1,50 @@
+### Get car details using loop & Variables
+
+---
+- hosts: localhost
+  vars:
+    car_info:
+      - description: "My car model is"
+        value: 'BMW X1'
+      - description: "My car was manufactured in"
+        value: 'Y2020'
+      - description: "My car has a mileage of"
+        value: '25000 miles'
+  tasks:
+    - name: Display car information
+      shell: echo "{{ item.description }} {{ item.value }}"
+      loop: "{{ car_info }}"
+      register: results
+
+    - name: Print details
+      debug:
+        msg: "{{ item.stdout }}"
+      loop: "{{ results.results }}"
+
+
+#####OUTPUT
+
+PLAY [localhost] ******************************************************************************************************************************************
+
+TASK [Gathering Facts] ************************************************************************************************************************************
+ok: [localhost]
+
+TASK [Display car information] ****************************************************************************************************************************
+changed: [localhost] => (item={u'description': u'My car model is', u'value': u'BMW X1'})
+changed: [localhost] => (item={u'description': u'My car was manufactured in', u'value': u'Y2020'})
+changed: [localhost] => (item={u'description': u'My car has a mileage of', u'value': u'25000 miles'})
+
+TASK [Print details] **************************************************************************************************************************************
+ok: [localhost] => (item={u'stderr_lines': [], u'ansible_loop_var': u'item', u'end': u'2024-07-06 16:13:08.413180', u'stderr': u'', u'stdout': u'My car model is BMW X1', u'changed': True, u'failed': False, u'delta': u'0:00:00.002852', u'cmd': u'echo "My car model is BMW X1"', u'item': {u'description': u'My car model is', u'value': u'BMW X1'}, u'rc': 0, u'invocation': {u'module_args': {u'warn': True, u'executable': None, u'_uses_shell': True, u'strip_empty_ends': True, u'_raw_params': u'echo "My car model is BMW X1"', u'removes': None, u'argv': None, u'creates': None, u'chdir': None, u'stdin_add_newline': True, u'stdin': None}}, u'stdout_lines': [u'My car model is BMW X1'], u'start': u'2024-07-06 16:13:08.410328'}) => {
+    "msg": "My car model is BMW X1"
+}
+ok: [localhost] => (item={u'stderr_lines': [], u'ansible_loop_var': u'item', u'end': u'2024-07-06 16:13:08.559349', u'stderr': u'', u'stdout': u'My car was manufactured in Y2020', u'changed': True, u'failed': False, u'delta': u'0:00:00.002585', u'cmd': u'echo "My car was manufactured in Y2020"', u'item': {u'description': u'My car was manufactured in', u'value': u'Y2020'}, u'rc': 0, u'invocation': {u'module_args': {u'warn': True, u'executable': None, u'_uses_shell': True, u'strip_empty_ends': True, u'_raw_params': u'echo "My car was manufactured in Y2020"', u'removes': None, u'argv': None, u'creates': None, u'chdir': None, u'stdin_add_newline': True, u'stdin': None}}, u'stdout_lines': [u'My car was manufactured in Y2020'], u'start': u'2024-07-06 16:13:08.556764'}) => {
+    "msg": "My car was manufactured in Y2020"
+}
+ok: [localhost] => (item={u'stderr_lines': [], u'ansible_loop_var': u'item', u'end': u'2024-07-06 16:13:08.694837', u'stderr': u'', u'stdout': u'My car has a mileage of 25000 miles', u'changed': True, u'failed': False, u'delta': u'0:00:00.003816', u'cmd': u'echo "My car has a mileage of 25000 miles"', u'item': {u'description': u'My car has a mileage of', u'value': u'25000 miles'}, u'rc': 0, u'invocation': {u'module_args': {u'warn': True, u'executable': None, u'_uses_shell': True, u'strip_empty_ends': True, u'_raw_params': u'echo "My car has a mileage of 25000 miles"', u'removes': None, u'argv': None, u'creates': None, u'chdir': None, u'stdin_add_newline': True, u'stdin': None}}, u'stdout_lines': [u'My car has a mileage of 25000 miles'], u'start': u'2024-07-06 16:13:08.691021'}) => {
+    "msg": "My car has a mileage of 25000 miles"
+}
+
+PLAY RECAP ************************************************************************************************************************************************
+localhost                  : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+

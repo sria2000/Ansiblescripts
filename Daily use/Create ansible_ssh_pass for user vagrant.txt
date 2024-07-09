@@ -1,0 +1,22 @@
+##Create ansible_ssh_pass for user vagrant
+##id -a { shows vagrant }
+vi inventory
+node01 ansible_host=node01 ansible_ssh_pass=password123
+node02 ansible_host=node02 ansible_ssh_pass=password123
+## Create a group
+[web_nodes]
+node01
+node02
+
+
+###test
+
+ansible -i inventory node02 -m ping -v
+Using /home/vagrant/playbooks/ansible.cfg as config file
+node02 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}

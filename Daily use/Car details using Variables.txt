@@ -1,0 +1,67 @@
+### Explain  3 vaiables and use the variables to print output
+
+---
+- hosts: localhost
+  vars:
+    car_model: 'BMW X1'
+    car_year: 'Y2020'
+    car_mil: '25000miles'
+  tasks:
+    - name: Display model
+      shell: echo "My car model is {{ car_model }}"
+      register: result_model
+    - name: Display car manufactutred year
+      shell: echo "My car wa manufactured in {{ car_year }}"
+      register: result_year
+    - name: Display mileage
+      shell: echo "My car has a Mileage of {{ car_mil }}"
+      register: result_mil
+    - name: Print Details
+      debug:
+        var: result_model.stdout
+    - name: Print Details
+      debug:
+        var: result_year.stdout
+    - name: Print Details
+      debug:
+        var: result_mil.stdout
+
+
+
+
+#####OUTPUT
+vagrant@ubuntu-xenial:~$ ansible-playbook -i inventory var.yaml
+
+PLAY [localhost] ******************************************************************************************************************************************
+
+TASK [Gathering Facts] ************************************************************************************************************************************
+ok: [localhost]
+
+TASK [Display model] **************************************************************************************************************************************
+changed: [localhost]
+
+TASK [Display car manufactutred year] *********************************************************************************************************************
+changed: [localhost]
+
+TASK [Display mileage] ************************************************************************************************************************************
+changed: [localhost]
+
+TASK [Print Details] **************************************************************************************************************************************
+ok: [localhost] => {
+    "result_model.stdout": "My car model is BMW X1"
+}
+
+TASK [Print Details] **************************************************************************************************************************************
+ok: [localhost] => {
+    "result_year.stdout": "My car wa manufactured in Y2020"
+}
+
+TASK [Print Details] **************************************************************************************************************************************
+ok: [localhost] => {
+    "result_mil.stdout": "My car has a Mileage of 25000miles"
+}
+
+PLAY RECAP ************************************************************************************************************************************************
+localhost                  : ok=7    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+vagrant@ubuntu-xenial:~$

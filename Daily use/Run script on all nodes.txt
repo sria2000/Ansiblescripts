@@ -1,0 +1,18 @@
+## Ansible playbook to run a simple script on all nodes
+
+---
+- name: Run a script on all servers
+  hosts: all
+  tasks:
+    - name: Run a script and execute
+      script: /home/vagrant/script.sh
+
+
+###sample script details..
+vagrant@ubuntu-xenial:~$ more script.sh
+#!/bin/bash
+ifconfig -a >> /tmp/output
+echo >> /tmp/output
+date >> /tmp/output
+netstat -nr >> /tmp/output
+vagrant@ubuntu-xenial:~$

@@ -1,0 +1,14 @@
+###Create a file called /tmp/resolv.conf 
+---
+- name: 'Add nameserver in resolv.conf file on localhost'
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: 'Add nameserver in resolv.conf file'
+      lineinfile:
+        path: /tmp/resolv.conf
+        line: 'nameserver 8.8.8.8'
+
+
+
+

@@ -1,0 +1,35 @@
+##Sample usage of Jinja2 template to replace a word and update in file
+mkdir -p  /home/vagrant/templates
+vi name.txt.j2
+{{ dialogue | replace('Bourne', 'Bond') }}
+
+
+cd /home/vagrant
+cat play.yml
+---
+- hosts: localhost
+  connection: local
+  vars:
+    dialogue: "The name is Bourne, James Bourne!"
+  tasks:
+    - template:
+        src: name.txt.j2
+        dest: /tmp/name.txt
+
+vagrant@ubuntu-xenial:~$ ansible-playbook -i inventory play.yml
+
+PLAY [localhost] ***************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [localhost]
+
+TASK [Generate name.txt from template] *****************************************
+ok: [localhost]
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+vagrant@ubuntu-xenial:~$ cat /tmp/name.txt
+The name is Bond, James Bond!
+vagrant@ubuntu-xenial:~$
+

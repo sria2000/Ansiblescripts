@@ -1,0 +1,49 @@
+##Creating a complex Inventory file
+Server Alias	Server Name	OS	User	Password
+mongo_db1	mongo01.example.com	Linux	root	RootPassw0rd
+mongo_db2	mongo02.example.com	Linux	root	RootPassw0rd
+nginx_node1	nginx01.example.com	Win	administrator	WindowsPassw0rd
+nginx_node2	nginx02.example.com	Win	administrator	WindowsPassw0rd
+nginx_node3	nginx03.example.com	Win	administrator	WindowsPassw0rd
+
+Group			Members
+db_nodes		mongo_db1, mongo_db2
+nginx_nodes		nginx_node1, nginx_node2, nginx_node3
+London_nodes		mongo_db1, nginx_node1
+Manchester_nodes	mongo_db2, nginx_node2, nginx_node3
+UK_nodes		London_nodes, Manchester_nodes
+
+
+vi inventory
+
+#nginx Servers
+nginx_node1 ansible_host=nginx01.example.com ansible_connection=winrm ansible_user=administrator ansible_password=WindowsPassw0rd
+nginx_node2 ansible_host=nginx02.example.com ansible_connection=winrm ansible_user=administrator ansible_password=WindowsPassw0rd
+nginx_node3 ansible_host=nginx03.example.com ansible_connection=winrm ansible_user=administrator ansible_password=WindowsPassw0rd
+
+#DB Servers
+mongo_db1 ansible_host=mongo01.example.com ansible_connection=ssh ansible_user=root ansible_ssh_pass=RootPassw0rd
+mongo_db2 ansible_host=mongo02.example.com ansible_connection=ssh ansible_user=root ansible_ssh_pass=RootPassw0rd
+
+#Groups
+[db_nodes]
+mongo_db1
+mongo_db2
+
+[nginx_nodes]
+nginx_node1
+nginx_node2
+nginx_node3
+
+[London_nodes]
+mongo_db1
+nginx_node1
+
+[Manchester_nodes]
+mongo_db2
+nginx_node2
+nginx_node3
+
+[UK_nodes:children]
+London_nodes
+Manchester_nodes

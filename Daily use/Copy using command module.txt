@@ -1,0 +1,23 @@
+##Explain Command module
+### Create folder & copy file using command module
+---
+- name: Play for Command module
+  hosts: all
+  become: yes
+  tasks:
+    - name: Execute command 'date'
+      command: date
+      register: dat
+    - name: Display
+      command: cat resolv.conf chdir=/etc
+      register: disp
+    - name: Create a Folder
+      command: mkdir /test123 creates=/test123
+    - name: Print details
+      debug:
+        var: dat.stdout
+    - name: Print file details
+      debug:
+        var: disp.stdout
+    - name: Copy resolv.conf to new dir
+      copy: src=/etc/resolv.conf dest=/test123/resolv.conf

@@ -1,0 +1,16 @@
+## Loop and with_items to print from loop
+---
+- name: 'Print fruits'
+  hosts: localhost
+  connection: local
+  vars:
+    fruits:
+      - Apple
+      - Banana
+      - Grapes
+      - Orange
+  tasks:
+    - command: 'echo "{{ item }}"'
+      with_items: '{{ fruits }}'
+##out 
+ansible-playbook -i localhost, fruits.yml -vv

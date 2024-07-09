@@ -1,0 +1,42 @@
+### USE JINJA2 TEMPLATE
+
+##Create Template
+vi /home/vagrant/template/agents.conf.j2
+
+hostname, ipaddress, monitor_port, type, protocol
+{% for host in groups['lamp_app'] %}
+{{ host }}, {{ hostvars[host]['ansible_host'] }}, {{ hostvars[host]['monitor_port'] }}, {{ hostvars[host]['protocol'] }}
+{% endfor %}
+
+##Create Inventory file
+vagrant@ubuntu-xenial:~$ more inventory
+[db]
+app01 ansible_host=192.168.61.11 monitor_port=8080 protocol=http
+
+[web]
+web01 ansible_host=192.168.61.12 monitor_port=8081 protocol=https
+
+[lamp_app:children]
+db
+web
+vagrant@ubuntu-xenial:~$
+
+###Create yml file
+---
+- hosts: all
+  become: yes
+  tasks:
+    - template:
+        src: agents.conf.j2
+        dest: /etc/agents.conf
+
+
+#CHECK OUTPUT ON APP01 
+
+vagrant@ubuntu-xenial:~$ cat /etc/agents.conf
+hostname, ipaddress, monitor_port, type, protocol
+app01, 192.168.61.11, 8080, http
+web01, 192.168.61.12, 8081, https
+vagrant@ubuntu-xenial:~$
+
+
