@@ -1,0 +1,228 @@
+## Temp file
+1) Yum install these
+git
+ansible-navigator
+ansible-builder
+
+2) podman login hub.lab.example.com
+3) edit .vimrc
+
+
+*************************************
+Q1) GIT
+sudo yum install git -y
+git config --global user.name "Martin Louis"
+git config --global user.email martin@example.com
+git config --global push.default simple
+git config --global -l
+*************************************
+Q2) user create
+
+1)    sudo yum install ansible-navigator -y
+2)  vim .vimrc
+set ai ts=2 et cuc
+
+  source .vimrc
+
+ 3) git clone git@git.lab.example.com:student/create_user.git 
+    cd create_user/
+
+4)     podman login hub.lab.example.com
+  
+   vim inventory 
+[dev]
+server
+
+ vim user_list.yml 
+
+---
+users:
+ - name: user1
+   job: developer
+ - name: user3
+   job: developer
+ - name: John
+   job: developer
+ 
+    ansible-navigator run users.yml -m stdout
+    git add .
+    git commit -m "Question 2"
+    git push
+    cd ..
+*************************************
+Q3) 
+
+git clone git@git.lab.example.com:student/web_server.git 
+cd web_server/
+vim alias.yml 
+
+student@workstation web_server]$ more alias.yml 
+---
+- name: Webserver and Alias Deployment
+  hosts: dev
+  roles:
+    - webserver
+  tasks:
+    - name: webserver alias deployment
+      template:
+        src: alias.temp.j2
+        dest: /var/www/html/index.html
+      notify: Restart the httpd
+  handlers: 
+    - name: Restart the http
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
+[student@workstation web_server]$ 
+
+ansible-navigator run alias.yml -m stdout
+
+
+git add .
+git commit -m " Added q 3"
+git push
+  
+***********************************************
+Q4) web content
+
+
+
+git clone git@git.lab.example.com:student/web_content.git
+cd web_content/
+ls -l
+vim content.yml
+
+student@workstation web_content]$ cat content.yml 
+---
+- name: Copy the content to webserver
+  hosts: dev
+  become: yes
+  tasks:
+   - name: Create Blue content
+     ansible.builtin.copy:
+       content: "Welcome to Blue Server"
+       dest: /var/www/html/index.html
+     tags: [never,blue]
+   - name: Create Green content
+     ansible.builtin.copy:
+       content: "Welcome to Green Server"
+       dest: /var/www/html/index.html
+     tags: [never,green]
+  
+[student@workstation web_content]$ 
+
+ 
+ansible-navigator run content.yml -m stdout
+vim content.yml 
+ansible-navigator run content.yml -m stdout
+ansible-navigator run content.yml --tags green -m stdout
+curl servera
+ansible-navigator run content.yml --tags blue -m stdout
+
+git add .
+git commit -m "Q 4"
+git push
+
+***************************************
+5) Ansible.cfg
+
+
+git clone git@git.lab.example.com:student/tunning_ansible.git 
+cd tunning_ansible
+vim ansible.cfg
+student@workstation tunning_ansible]$ cat ansible.cfg 
+[defaults]
+remote_user = devops
+inventory = inventory
+
+[privilege_escalation]
+become = true
+
+forks = 40
+gathering = explicit
+
+
+ansible-navigator run sample.yml -m stdout
+git add .
+git commit -m "Q5 "
+git push
+
+
+*************
+
+
+q6)
+
+git clone git@git.lab.example.com:student/create_complex_user.git
+cd create_complex
+
+
+[student@workstation create_complex_user]$ more complex_users.yml 
+---
+- name: Creating the Users at the Managed_Host
+  hosts: all
+  become: yes
+  vars_files:
+    - user_list.yml
+  tasks:
+    - name: Create the user
+      vars:
+        password: "{{ lookup('password', ('password-') + item.name + 'length=6') }}"
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        uid: "{{ item.ID }}"
+        state: present
+        password: "{{ password|password_hash('sha256') }}"
+        comment: "{{ item.first|capitalize+ ' '+ item.middle|capitalize+ ' '+ item.last|capitalize }}"
+      loop: "{{ users }}"
+[student@workstation create_complex_user]$ 
+
+
+**********************************************************
+q7) 
+
+hub.lab.example.com
+Collection -> Repository Management-> rh-certified and expand CLI 
+
+mkdir -p /home/student/mycollection
+vim ansible.cfg
+paste here
+
+
+hub - generate token and paste above
+
+cd /home/student/mycollection
+ansible-galaxy collection install ansible.netcommon -p /home/student/mycollection
+ansible-galaxy collection list -p /home/student/mycollection
+
+*********************
+
+8) 
+
+git clone git@git.lab.example.com:student/custom_collection.git
+cd custom_collection
+ansible_galaxy collection init rhel.user
+cd rhel/user
+mkdir meta      { Create where you see galaxy.yml }
+vim meta/runtime.yml
+
+---
+requires_ansible: ">=2.9.10"
+
+cd roles   { rhel/user/roles directory }
+ansible-galaxy role init newuser 
+cp ~/custom_collection/users.conf newuser/files
+cp ~/custom_collection/task_user.yml newuser/tasks/main.yml
+
+cd .. {  rhel/user  - see if you can see galaxy.yml }
+ansible-galaxy collection build
+cp ~/ustom_collection/rhel/user/rhel-user-1.0.0.tar.gz ~/custom_collection/
+cd ~/custom_collection
+
+Automation hub=> Namespace -> Create rhel (use existing). copy URL
+
+cp ~/ansible.cfg .
+
+vim ansible.cfg & modify URL
+
+ansible-galaxy collection publish -v rhel-user-1.0.0.tar.gz ( APPROVE IN HUB)
