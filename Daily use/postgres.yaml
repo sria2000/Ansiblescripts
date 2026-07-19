@@ -1,0 +1,81 @@
+## vars.yaml
+---
+# PostgreSQL version
+postgresql_version: "16"
+
+# Repository RPM
+postgresql_repo_url: "https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
+
+# Packages
+postgresql_packages:
+  - "postgresql{{ postgresql_version }}"
+  - "postgresql{{ postgresql_version }}-server"
+  - "postgresql{{ postgresql_version }}-contrib"
+
+# Service name
+postgresql_service: "postgresql-{{ postgresql_version }}"
+
+# Database location
+postgresql_data_dir: "/var/lib/pgsql/{{ postgresql_version }}/data"
+
+#tasks/main.yaml
+
+---
+- name: Check if PostgreSQL repository is installed
+  ansible.builtin.package_facts:
+    manager: auto
+
+
+- name: Install PostgreSQL repository
+  ansible.builtin.dnf:
+    name: "{{ postgresql_repo_url }}"
+    state: present
+
+
+- name: Refresh package metadata
+  ansible.builtin.dnf:
+    update_cache: yes
+
+
+- name: Check if PostgreSQL package is installed
+  ansible.builtin.package_facts:
+    manager: auto
+
+
+- name: Install PostgreSQL {{ postgresql_version }}
+  ansible.builtin.dnf:
+    name: "{{ postgresql_packages }}"
+    state: present
+  when:
+    - "'postgresql{{ postgresql_version }}-server' not in ansible_facts.packages"
+
+
+- name: Check if database is initialized
+  ansible.builtin.stat:
+    path: "{{ postgresql_data_dir }}/PG_VERSION"
+  register: postgres_init
+
+
+- name: Initialize PostgreSQL database
+  ansible.builtin.command:
+    cmd: "/usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb"
+  when:
+    - not postgres_init.stat.exists
+
+
+- name: Enable and start PostgreSQL service
+  ansible.builtin.systemd:
+    name: "{{ postgresql_service }}"
+    state: started
+    enabled: yes
+
+
+- name: Check PostgreSQL service status
+  ansible.builtin.systemd:
+    name: "{{ postgresql_service }}"
+  register: postgres_status
+
+
+- name: Display PostgreSQL status
+  ansible.builtin.debug:
+    msg: "PostgreSQL service is {{ postgres_status.status.ActiveState }}"
