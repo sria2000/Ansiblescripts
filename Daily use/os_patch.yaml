@@ -1,0 +1,33 @@
+---
+# vars/main.yaml
+ 
+rhel_release_map:
+  "7": "7.7"
+  "8": "8.10"
+  "9": "9.4"
+
+
+Main · YAML
+---
+# tasks/main.yaml
+ 
+- name: Skip patching on RHEL6
+  ansible.builtin.debug:
+    msg: "RHEL6 detected on {{ inventory_hostname }} - skipping patch"
+  when: ansible_facts['distribution_major_version'] == "6"
+ 
+- name: Set subscription-manager release
+  ansible.builtin.command: "subscription-manager release --set={{ rhel_release_map[ansible_facts['distribution_major_version']] }}"
+  when: ansible_facts['distribution_major_version'] != "6"
+ 
+- name: Run yum update
+  ansible.builtin.yum:
+    name: "*"
+    state: latest
+  when: ansible_facts['distribution_major_version'] != "6"
+ 
+- name: Reboot the host after patching
+  ansible.builtin.reboot:
+    reboot_timeout: 600
+  when: ansible_facts['distribution_major_version'] != "6"
+ 
