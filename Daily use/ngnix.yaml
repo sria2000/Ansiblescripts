@@ -1,0 +1,65 @@
+---
+- name: Install and Configure Nginx Web Server
+  hosts: webservers
+  become: yes
+
+  tasks:
+
+    # Install nginx package
+    - name: Install nginx
+      ansible.builtin.package:
+        name: nginx
+        state: present
+
+
+    # Start nginx service
+    - name: Start nginx service
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: yes
+
+
+    # Check nginx status
+    - name: Check nginx service status
+      ansible.builtin.systemd:
+        name: nginx
+      register: nginx_status
+
+
+    - name: Display nginx status
+      ansible.builtin.debug:
+        var: nginx_status.status.ActiveState
+
+
+    # Open firewall port 80
+    - name: Allow HTTP service through firewall
+      ansible.posix.firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+        immediate: yes
+
+
+    # Deploy custom index page
+    - name: Create custom webpage
+      ansible.builtin.copy:
+        dest: /usr/share/nginx/html/index.html
+        content: |
+          <html>
+          <h1>
+          Nginx deployed using Ansible
+          </h1>
+          </html>
+
+
+    # Validate nginx listening port
+    - name: Check nginx listening port
+      ansible.builtin.shell:
+        cmd: ss -tulpn | grep :80
+      register: nginx_port
+
+
+    - name: Display listening port
+      ansible.builtin.debug:
+        var: nginx_port.stdout
