@@ -1,0 +1,159 @@
+CVE Install on RHEL8 or RHEL9
+
+---
+# rhel_cve_patch.yml
+# Purpose: Patch a CVE-related package on RHEL8/RHEL9 hosts, selecting the
+#          correct package via ansible_facts, notifying handlers for
+#          logging/restart, with block/rescue/always error handling.
+#
+# Layout:
+#   vars/main.yaml      - cve_packages map + defaults
+#   handlers/main.yaml  - log success/failure, restart service
+#   rhel_cve_patch.yml  - this playbook
+
+- name: Apply CVE patch based on RHEL major version
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars_files:
+    - vars/main.yaml
+
+  handlers:
+    - ansible.builtin.import_tasks: handlers/main.yaml
+
+  pre_tasks:
+    - name: Fail fast if OS is not RHEL
+      ansible.builtin.fail:
+        msg: >
+          Unsupported OS family '{{ ansible_facts['os_family'] }}' on
+          {{ inventory_hostname }}. This playbook only targets RedHat.
+      when: ansible_facts['os_family'] != "RedHat"
+
+    - name: Fail fast if major version is not 8 or 9
+      ansible.builtin.fail:
+        msg: >
+          Unsupported RHEL major version
+          '{{ ansible_facts['distribution_major_version'] }}' on
+          {{ inventory_hostname }}. Only RHEL8/RHEL9 are supported.
+      when: ansible_facts['distribution_major_version'] not in cve_packages
+
+  tasks:
+    - name: Patch CVE package (with error handling)
+      block:
+
+        - name: Set target CVE package name from facts
+          ansible.builtin.set_fact:
+            cve_package_name: "{{ cve_packages[ansible_facts['distribution_major_version']] }}"
+
+        - name: Show resolved package for this host
+          ansible.builtin.debug:
+            msg: >
+              {{ inventory_hostname }} is RHEL{{ ansible_facts['distribution_major_version'] }}
+              -> installing package '{{ cve_package_name }}'
+
+        - name: Install CVE patch package on RHEL8
+          ansible.builtin.dnf:
+            name: "{{ cve_package_name }}"
+            state: latest
+            update_cache: true
+          when: ansible_facts['distribution_major_version'] == "8"
+          notify: "cve patch succeeded"
+
+        - name: Install CVE patch package on RHEL9
+          ansible.builtin.dnf:
+            name: "{{ cve_package_name }}"
+            state: latest
+            update_cache: true
+          when: ansible_facts['distribution_major_version'] == "9"
+          notify: "cve patch succeeded"
+
+        - name: Mark patch as successful
+          ansible.builtin.set_fact:
+            patch_status: "success"
+
+      rescue:
+        - name: Mark patch as failed
+          ansible.builtin.set_fact:
+            patch_status: "failed"
+
+        - name: Trigger failure handler
+          ansible.builtin.meta: flush_handlers
+          # flush ensures notify below fires immediately, not at end of play
+
+        - name: Notify failure log handler
+          ansible.builtin.debug:
+            msg: >
+              CVE patch FAILED on {{ inventory_hostname }}
+              (RHEL{{ ansible_facts['distribution_major_version'] }}).
+              Error: {{ ansible_failed_result.msg | default('see task output above') }}
+          notify: "cve patch failed"
+
+      always:
+        - name: Flush handlers so success/failure logging + restart run now
+          ansible.builtin.meta: flush_handlers
+
+        - name: Report final patch status for this host
+          ansible.builtin.debug:
+            msg: "Host {{ inventory_hostname }}: patch_status = {{ patch_status }}"
+
+  post_tasks:
+    - name: Fail the play explicitly if patching failed (surfaces non-zero exit code)
+      ansible.builtin.fail:
+        msg: "CVE patching failed on {{ inventory_hostname }}. See {{ cve_failure_log }} for details."
+      when: patch_status == "failed"
+
+
+
+## vars/main.yaml
+
+---
+# vars/main.yaml
+# CVE remediation package name per RHEL major version.
+# Add new versions here only — no task changes needed.
+cve_packages:
+  "8": "cve-rhel8"
+  "9": "cve-rhel9"
+ 
+# Default status per host before patching runs
+patch_status: "not_attempted"
+ 
+# Where failures get logged on the controller
+cve_failure_log: /var/log/cve_patch_failures.log
+ 
+# Set true if the CVE package requires a service restart to take effect
+restart_required: true
+service_to_restart: "app_service"   # replace with the real service name
+ 
+
+##handlers
+
+
+Main · YAML
+---
+# handlers/main.yaml
+ 
+- name: log patch success
+  ansible.builtin.debug:
+    msg: >
+      SUCCESS - {{ inventory_hostname }} (RHEL{{ ansible_facts['distribution_major_version'] }})
+      patched with {{ cve_package_name }}
+  listen: "cve patch succeeded"
+ 
+- name: log patch failure
+  ansible.builtin.lineinfile:
+    path: "{{ cve_failure_log }}"
+    line: "{{ ansible_date_time.iso8601 }} - {{ inventory_hostname }} - CVE patch failed"
+    create: true
+    mode: "0644"
+  delegate_to: localhost
+  become: false
+  listen: "cve patch failed"
+ 
+- name: restart affected service
+  ansible.builtin.systemd:
+    name: "{{ service_to_restart }}"
+    state: restarted
+  when: restart_required | bool
+  listen: "cve patch succeeded"
+ 
