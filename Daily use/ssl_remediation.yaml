@@ -1,0 +1,65 @@
+---
+- name: Root SSL Certificate Remediation
+  hosts: all
+  become: yes
+
+  vars:
+
+    ssl_source_dir: "certs/"
+
+    ssl_target_dir: "/etc/pki/tls/certs/anchor"
+
+    ssl_backup_dir: "/etc/pki/tls/certs/anchor.old"
+
+
+  tasks:
+
+
+    - name: Check existing SSL directory
+      ansible.builtin.stat:
+        path: "{{ ssl_target_dir }}"
+      register: ssl_dir
+
+
+    - name: Backup existing SSL certificates
+      ansible.builtin.copy:
+        src: "{{ ssl_target_dir }}/"
+        dest: "{{ ssl_backup_dir }}/"
+        remote_src: yes
+        owner: root
+        group: root
+        mode: '0644'
+      when:
+        - ssl_dir.stat.exists
+
+
+    - name: Create SSL directory
+      ansible.builtin.file:
+        path: "{{ ssl_target_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+
+    - name: Copy new root SSL certificates
+      ansible.builtin.copy:
+        src: "{{ ssl_source_dir }}"
+        dest: "{{ ssl_target_dir }}/"
+        owner: root
+        group: root
+        mode: '0644'
+
+
+    - name: Verify SSL certificates
+      ansible.builtin.find:
+        paths: "{{ ssl_target_dir }}"
+        patterns:
+          - "*.crt"
+          - "*.pem"
+      register: ssl_check
+
+
+    - name: Display installed certificates
+      ansible.builtin.debug:
+        var: ssl_check.files
